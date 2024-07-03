@@ -1,5 +1,8 @@
 import json
 import requests
+import aiohttp
+import asyncio
+
 class Quran:
     def __init__():
         pass
@@ -497,8 +500,21 @@ def getAyahForPage(page_number):
     respond = sendRequest(url)
     listofAyah = []
     for i in range(len(respond["verses"])):
-        print(respond["verses"][i]["text_indopak"]+"\uFD3E"+str(i+1)+"\uFD3F")
+        #print(respond["verses"][i]["text_indopak"]+"\uFD3E"+str(i+1)+"\uFD3F")
         ayah = respond["verses"][i]["text_indopak"]+"\uFD3F"+str(i+1)+"\uFD3E"
         listofAyah.append(ayah)
     return listofAyah
 
+async def fetch(session, url):
+    async with session.get(url) as response:
+        return await response.text()
+
+async def main():
+    urls = [getIndopakoOfAyah(page_number=i) for i in range(1,604+1)]
+    
+    async with aiohttp.ClientSession() as session:
+        tasks = [fetch(session, url) for url in urls]
+        responses = await asyncio.gather(*tasks)
+        print(responses)
+
+asyncio.run(main())
